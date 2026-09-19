@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Live Stream Cloud</title>
+    <!-- Memuat aset CSS Video.js langsung dari CDN resmi -->
+    <link href="https://unpkg.com" rel="stylesheet">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            background: #1a1a1a; 
+            color: white; 
+            padding-top: 50px; 
+            margin: 0;
+        }
+        .video-container { 
+            display: flex; 
+            justify-content: center; 
+            margin-top: 20px; 
+        }
+        .info-text {
+            color: #aaa;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h3>Live CCTV Snapshot (Update Tiap 1 Menit)</h3>
+    
+    <div class="video-container">
+        <!-- Struktur Pemutar Video HTML5 dengan Video.js -->
+        <video id="cctv-player" class="video-js vjs-default-skin vjs-big-play-centered" width="640" height="360" controls preload="auto">
+            <!-- PENTING: GANTI URL DI BAWAH DENGAN PUBLIC DEVELOPMENT URL BUCKET CLOUD FLARE R2 ANDA -->
+            <source src="https://pub-b603cfaa840249e88af38c65a0b635cb.r2.dev" type="application/x-mpegURL">
+        </video>
+    </div>
+    
+    <p class="info-text">Video akan otomatis memuat ulang klip terbaru setiap 60 detik.</p>
+
+    <!-- Memuat pustaka JavaScript Video.js dari CDN resmi -->
+    <script src="https://unpkg.com"></script>
+    <script>
+        // Inisialisasi pemutar videoJS
+        var player = videojs('cctv-player');
+        
+        // Browser modern mewajibkan status Mute agar video bisa langsung Autoplay otomatis
+        player.muted(true); 
+        player.play();
+
+        // LOGIKA OTOMATIS MEMUAT ULANG KLIP VIDEO TERBARU TIAP 1 MENIT
+        setInterval(function() {
+            console.log("Memuat ulang klip CCTV terbaru dari Cloudflare R2...");
+            
+            // Mengambil URL asal video
+            var currentSource = player.currentSrc();
+            // Memisahkan parameter waktu lama jika ada agar tidak menumpuk
+            var baseUrl = currentSource.split('?')[0]; 
+            
+            // Memasukkan URL baru dengan stempel waktu unik (?t=...) agar browser tidak membaca cache file lama
+            player.src({
+                src: baseUrl + '?t=' + new Date().getTime(),
+                type: 'application/x-mpegURL'
+            });
+            
+            // Putar kembali video setelah siap
+            player.ready(function() {
+                player.play();
+            });
+        }, 60000); // 60000 milidetik = 1 menit
+    </script>
+</body>
+</html>
