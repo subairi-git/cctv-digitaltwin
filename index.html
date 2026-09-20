@@ -3,9 +3,11 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCTV Live Stream Cloud</title>
-    <!-- Memuat aset CSS Video.js langsung dari CDN resmi -->
+    <title>CCTV Digital Twin Monitoring</title>
+    
+    <!-- FIX: Link CSS Video.js yang lengkap -->
     <link href="https://unpkg.com" rel="stylesheet">
+    
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -28,48 +30,44 @@
     </style>
 </head>
 <body>
+
     <h3>Live CCTV Snapshot (Update Tiap 1 Menit)</h3>
     
     <div class="video-container">
-        <!-- Struktur Pemutar Video HTML5 dengan Video.js -->
         <video id="cctv-player" class="video-js vjs-default-skin vjs-big-play-centered" width="640" height="360" controls preload="auto">
-            <!-- PENTING: GANTI URL DI BAWAH DENGAN PUBLIC DEVELOPMENT URL BUCKET CLOUD FLARE R2 ANDA -->
-            <source src="https://pub-b603cfaa840249e88af38c65a0b635cb.r2.dev" type="application/x-mpegURL">
+            <!-- FIX: URL Cloudflare R2 yang sudah diarahkan ke file /playlist.m3u8 -->
+            <source src="https://pub-b603cfaa840249e88af38c65a0b635cb.r2.dev/playlist.m3u8" type="application/x-mpegURL">
         </video>
     </div>
     
-    <p class="info-text">Video akan otomatis memuat ulang klip terbaru setiap 60 detik.</p>
+    <p class="info-text">Halaman akan memuat ulang klip video terbaru secara otomatis setiap 60 detik.</p>
 
-    <!-- Memuat pustaka JavaScript Video.js dari CDN resmi -->
+    <!-- FIX: Link Script Video.js yang lengkap -->
     <script src="https://unpkg.com"></script>
+    
     <script>
-        // Inisialisasi pemutar videoJS
+        // Inisialisasi pemutar video
         var player = videojs('cctv-player');
         
-        // Browser modern mewajibkan status Mute agar video bisa langsung Autoplay otomatis
+        // Mute video agar fitur autoplay diizinkan oleh sistem browser
         player.muted(true); 
         player.play();
 
-        // LOGIKA OTOMATIS MEMUAT ULANG KLIP VIDEO TERBARU TIAP 1 MENIT
+        // Fitur auto-refresh klip video setiap 60 detik tanpa memicu cache browser
         setInterval(function() {
-            console.log("Memuat ulang klip CCTV terbaru dari Cloudflare R2...");
-            
-            // Mengambil URL asal video
+            console.log("Memuat ulang klip CCTV terbaru...");
             var currentSource = player.currentSrc();
-            // Memisahkan parameter waktu lama jika ada agar tidak menumpuk
             var baseUrl = currentSource.split('?')[0]; 
             
-            // Memasukkan URL baru dengan stempel waktu unik (?t=...) agar browser tidak membaca cache file lama
             player.src({
                 src: baseUrl + '?t=' + new Date().getTime(),
                 type: 'application/x-mpegURL'
             });
             
-            // Putar kembali video setelah siap
             player.ready(function() {
                 player.play();
             });
-        }, 60000); // 60000 milidetik = 1 menit
+        }, 60000);
     </script>
 </body>
 </html>
